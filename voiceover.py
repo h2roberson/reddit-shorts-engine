@@ -1,32 +1,24 @@
+from gtts import gTTS
+from pathlib import Path
 import json
-import os
-import subprocess
 
-GENERATED_DIR = "generated"
-AUDIO_DIR = "audio"
+# Paths
+TEXT_FILE = Path("generated/reddit_story.txt")
+AUDIO_DIR = Path("audio")
+AUDIO_DIR.mkdir(exist_ok=True)
+OUTPUT_AUDIO = AUDIO_DIR / "voiceover.mp3"
 
-os.makedirs(AUDIO_DIR, exist_ok=True)
+# Validate input
+if not TEXT_FILE.exists():
+    raise FileNotFoundError("reddit_story.txt not found")
 
-latest_file = sorted(
-    [f for f in os.listdir(GENERATED_DIR) if f.endswith(".json")]
-)[-1]
+text = TEXT_FILE.read_text(encoding="utf-8").strip()
 
-with open(os.path.join(GENERATED_DIR, latest_file), "r") as f:
-    data = json.load(f)
+if not text:
+    raise ValueError("Story text is empty")
 
-text = data["narration"]
+# Generate audio
+tts = gTTS(text=text, lang="en", slow=False)
+tts.save(str(OUTPUT_AUDIO))
 
-output_audio = os.path.join(
-    AUDIO_DIR, latest_file.replace(".json", ".mp3")
-)
-
-command = [
-    "edge-tts",
-    "--voice", "en-US-GuyNeural",
-    "--text", text,
-    "--write-media", output_audio
-]
-
-subprocess.run(command, check=True)
-
-print("Voiceover generated:", output_audio)
+print(f"Voiceover generated: {OUTPUT_AUDIO}")
