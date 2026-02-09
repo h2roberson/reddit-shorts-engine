@@ -77,9 +77,12 @@ story_templates = {
 hook = hooks[topic]
 story_paragraphs = story_templates[topic]
 
+narration_text = hook + ". " + " ".join(story_paragraphs)
+
 output = {
     "hook": hook,
     "story": story_paragraphs,
+    "narration": narration_text,
     "cta": "Follow for more real Reddit stories",
     "background_style": "Subway Surfers or Minecraft parkour",
     "estimated_duration_seconds": 50
