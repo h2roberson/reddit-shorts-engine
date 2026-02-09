@@ -30,8 +30,7 @@ jobs:
 
       # 4️⃣ Run Reddit story generator
       - name: Generate Reddit story
-        run: python reddit_engine.py
-
+        run: python engine.py
       # 5️⃣ Generate voiceover audio
       - name: Generate voiceover
         run: python voiceover.py
