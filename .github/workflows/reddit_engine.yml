@@ -23,10 +23,15 @@ jobs:
       - name: Run content engine
         run: python engine.py
 
-      - name: Commit generated content
+      -      - name: Commit outputs
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
-          git add generated engine_memory.json || true
-          git commit -m "Generate Reddit short" || true
-          git push
+
+          git fetch origin main
+          git rebase origin/main || true
+
+          git add generated audio engine_memory.json || true
+          git commit -m "Generate Reddit short + voiceover" || true
+
+          git push origin main || git push --force-with-lease
