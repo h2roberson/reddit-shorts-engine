@@ -20,18 +20,19 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Install TTS
+        run: pip install edge-tts
+
       - name: Run content engine
         run: python engine.py
+
+      - name: Generate voiceover
+        run: python voiceover.py
 
       - name: Commit outputs
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
-
-          git fetch origin main
-          git rebase origin/main || true
-
           git add generated audio engine_memory.json || true
           git commit -m "Generate Reddit short + voiceover" || true
-
-          git push origin main || git push --force-with-lease
+          git push
