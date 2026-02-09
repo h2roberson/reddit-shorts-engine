@@ -1,99 +1,57 @@
-import json
-import os
+from pathlib import Path
 import random
-from datetime import datetime
+import json
 
-os.makedirs("generated", exist_ok=True)
+# ----- PATHS -----
+OUTPUT_DIR = Path("generated")
+OUTPUT_DIR.mkdir(exist_ok=True)
 
-MEMORY_FILE = "engine_memory.json"
+STORY_FILE = OUTPUT_DIR / "reddit_story.txt"
+MEMORY_FILE = Path("engine_memory.json")
 
-if os.path.exists(MEMORY_FILE):
-    with open(MEMORY_FILE, "r") as f:
-        memory = json.load(f)
+# ----- LOAD OR INIT MEMORY -----
+if MEMORY_FILE.exists():
+    memory = json.loads(MEMORY_FILE.read_text())
 else:
-    memory = {}
+    memory = {"used_topics": []}
 
-if "used_topics" not in memory:
-    memory["used_topics"] = []
-
+# ----- SAMPLE REDDIT-STYLE TOPICS -----
 topics = [
-    "roommate horror story",
-    "relationship betrayal",
-    "family secret",
-    "workplace nightmare",
-    "creepy coincidence"
+    "What’s a secret you’ve never told anyone?",
+    "What’s the creepiest thing that happened to you at night?",
+    "What’s a mistake that changed your life forever?",
+    "What’s the most awkward thing you’ve witnessed?",
+    "What’s something that sounds fake but is 100% real?"
 ]
 
-available_topics = [t for t in topics if t not in memory["used_topics"]]
-
-if not available_topics:
+# Prevent repeats
+available = [t for t in topics if t not in memory["used_topics"]]
+if not available:
     memory["used_topics"] = []
-    available_topics = topics
+    available = topics
 
-topic = random.choice(available_topics)
+topic = random.choice(available)
 memory["used_topics"].append(topic)
 
-hooks = {
-    "roommate horror story": "I thought my roommate was normal until this happened",
-    "relationship betrayal": "I ignored the red flags and it cost me everything",
-    "family secret": "I found out something about my family I wish I didn’t know",
-    "workplace nightmare": "I should’ve quit my job when this happened",
-    "creepy coincidence": "This coincidence still doesn’t make sense"
-}
+# ----- GENERATE STORY TEXT -----
+story = f"""
+Reddit asked:
 
-story_templates = {
-    "roommate horror story": [
-        "I moved in with my roommate because rent was cheap and everything seemed fine at first.",
-        "About a month in, I started noticing small things going missing. At first, I blamed myself.",
-        "One night, I came home early and saw something I was never meant to see.",
-        "I moved out the next morning without telling them why."
-    ],
-    "relationship betrayal": [
-        "We had been together for years and I trusted them completely.",
-        "People warned me about the signs but I ignored them.",
-        "One night, I accidentally saw a message that wasn’t meant for me.",
-        "That was the moment everything fell apart."
-    ],
-    "family secret": [
-        "Growing up, there was always something my family refused to talk about.",
-        "I didn’t think much of it until I found a box hidden in the attic.",
-        "Inside were documents that explained everything.",
-        "I’ve never looked at my family the same since."
-    ],
-    "workplace nightmare": [
-        "My job started out perfect and the pay was decent.",
-        "Then management changed and things became uncomfortable fast.",
-        "What finally happened crossed a line I didn’t know existed.",
-        "HR told me it was best to stay quiet."
-    ],
-    "creepy coincidence": [
-        "I don’t believe in coincidences, but this made me question everything.",
-        "It started with something small that I brushed off.",
-        "Then it happened again in a way I couldn’t ignore.",
-        "I still can’t explain how this was possible."
-    ]
-}
+{topic}
 
-hook = hooks[topic]
-story_paragraphs = story_templates[topic]
+Here’s what someone replied:
 
-narration_text = hook + ". " + " ".join(story_paragraphs)
+I never thought I’d share this, but one night everything changed.
+What started as a normal day ended with a moment I still think about.
+I learned something about myself that night — and I’ll never forget it.
+"""
 
-output = {
-    "hook": hook,
-    "story": story_paragraphs,
-    "narration": narration_text,
-    "cta": "Follow for more real Reddit stories",
-    "background_style": "Subway Surfers or Minecraft parkour",
-    "estimated_duration_seconds": 50
-}
+story = story.strip()
 
-filename = f"generated/{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+# ----- WRITE STORY FILE -----
+STORY_FILE.write_text(story, encoding="utf-8")
 
-with open(filename, "w") as f:
-    json.dump(output, f, indent=2)
+# ----- SAVE MEMORY -----
+MEMORY_FILE.write_text(json.dumps(memory, indent=2))
 
-with open(MEMORY_FILE, "w") as f:
-    json.dump(memory, f, indent=2)
-
-print("Generated story:", filename)
+print(f"Story written to {STORY_FILE}")
