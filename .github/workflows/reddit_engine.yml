@@ -23,7 +23,7 @@ jobs:
       - name: Run content engine
         run: python engine.py
 
-      -      - name: Commit outputs
+      - name: Commit outputs
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
