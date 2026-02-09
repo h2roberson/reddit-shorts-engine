@@ -11,7 +11,10 @@ if os.path.exists(MEMORY_FILE):
     with open(MEMORY_FILE, "r") as f:
         memory = json.load(f)
 else:
-    memory = {"used_topics": []}
+    memory = {}
+
+if "used_topics" not in memory:
+    memory["used_topics"] = []
 
 topics = [
     "roommate horror story",
