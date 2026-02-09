@@ -2,39 +2,45 @@ name: Reddit Shorts Engine
 
 on:
   workflow_dispatch:
-
-permissions:
-  contents: write
+  schedule:
+    - cron: "0 */6 * * *"   # Runs every 6 hours
 
 jobs:
   generate:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      # 1️⃣ Checkout repo with push access
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: true
 
+      # 2️⃣ Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # 3️⃣ Install dependencies (ONLY what we need)
       - name: Install dependencies
         run: |
-           python -m pip install --upgrade 
-           pip pip install gtts
+          python -m pip install --upgrade pip
+          pip install gtts
 
-      - name: Run content engine
-        run: python engine.py
+      # 4️⃣ Run Reddit story generator
+      - name: Generate Reddit story
+        run: python reddit_engine.py
 
+      # 5️⃣ Generate voiceover audio
       - name: Generate voiceover
         run: python voiceover.py
 
+      # 6️⃣ Commit & push results
       - name: Commit outputs
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
           git add generated audio engine_memory.json || true
-          git commit -m "Generate Reddit short + voiceover" || true
+          git commit -m "Automated Reddit Short generation" || echo "No changes to commit"
           git push
